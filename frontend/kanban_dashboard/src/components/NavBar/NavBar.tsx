@@ -1,9 +1,11 @@
 import { type FC } from 'react';
 import { Link } from '@tanstack/react-router';
+import type {Workspace as WorkspaceInterface} from '../../types/workspace.tsx';
+
 interface NavBarProps{
-    workspaces: any[];
+    workspaces: WorkspaceInterface[];
 }
-const NavBar: FC<NavBarProps> = ({ workspaces }: { workspaces: any[] }) => {
+const NavBar: FC<NavBarProps> = ({ workspaces }) => {
   return (
     <nav className="top-navbar">
       <h2>My Dashboards</h2>

@@ -1,11 +1,11 @@
 import { type FC } from 'react';
 
-interface BottonProps{
+interface ButtonProps{
     value: string;
-    onClick: ()=> void;
+    onClick: () => void ;
 }
 
-const Button: FC<BottonProps> = ({value, onClick}) => {
+const Button: FC<ButtonProps> = ({value, onClick}) => {
   return (
     <button onClick={onClick}>{value}</ button>
   );

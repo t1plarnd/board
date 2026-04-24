@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { type FC } from "react";
 import Task, { type TaskProps } from "../Task/Task";
-import Button from "../Botton/button";
+import Button from "../Button/button";
 import { AppContext } from "../../router/router";
 
 export interface BoardProps {
@@ -12,39 +12,18 @@ export interface BoardProps {
 }
 
 const Board: FC<BoardProps> = ({ workspaceId, id, name, tasks }) => {
-  const { data, setData } = useContext(AppContext);
-
-  const createTask = () => {
-    const userTitle = window.prompt("Enter new task title:");
-    if (!userTitle || userTitle.trim() === "") {
-        return; 
-    }
-
-    const newData = structuredClone(data);
-    const workspace = newData.workspaces.find((ws: any) => ws.id === workspaceId);
-    const board = workspace.boards.find((b: any) => b.id === id);
-    board.tasks.push({ 
-        id: `t_${Date.now()}`, 
-        title: userTitle
-    });
-
-    setData(newData);
-};
-
-  const deleteBoard = () => {
-    const newData = structuredClone(data);
-    const workspace = newData.workspaces.find((ws: any) => ws.id === workspaceId);
-    workspace.boards.splice(id, 1);
-
-    setData(newData);
-  };
+  const context = useContext(AppContext);
+  if (!context) {
+    return null;
+  }
 
   return (
     <div className="board-column">
       {/*<p className="task-id">{id}</p>*/}
       <h1>{name}</h1>
-      <Button value="Delete board" onClick={deleteBoard} />
-      <Button value="Create task" onClick={createTask} />
+      <Button value="Delete board" onClick={() => {context.boardCallbacks.delete(workspaceId, id)}} />
+      <Button value="Update board" onClick={() => {context.boardCallbacks.update(workspaceId, id)}} />
+      <Button value="Create task" onClick={() => {context.taskCallbacks.create(workspaceId, id)}} />
       <div>
         {tasks.map((task) => (
           <Task 

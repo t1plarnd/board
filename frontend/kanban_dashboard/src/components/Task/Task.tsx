@@ -1,5 +1,5 @@
 import { type FC } from "react";
-import Button from "../Botton/button";
+import Button from "../Button/button";
 import { AppContext } from "../../router/router";
 import { useContext } from "react";
 
@@ -11,20 +11,15 @@ export interface TaskProps {
 }
 
 const Task: FC<TaskProps> = ({ id, title, workspaceId, boardId }) => {
-  const { data, setData } = useContext(AppContext);
-
-  const deleteTask = () => {
-    const newData = structuredClone(data);
-    const workspace = newData.workspaces.find((ws: any) => ws.id === workspaceId);
-    const board = workspace.boards.find((b: any) => b.id === boardId);
-    board.tasks.splice(id, 1);
-
-    setData(newData);
-  };
+  const context = useContext(AppContext);
+  if (!context) {
+    return null;
+  }
 
   return (
     <div className="task-card">
-      <Button value="Delete task" onClick={deleteTask} />
+      <Button value="Delete task" onClick={() => context.taskCallbacks.delete(workspaceId, boardId, id)} />
+      <Button value="Update task" onClick={() => context.taskCallbacks.update(workspaceId, boardId, id)} />
       {/*<p className="task-id">{id}</p>*/}
       <h3 className="task-title">{title}</h3>
     </div>
