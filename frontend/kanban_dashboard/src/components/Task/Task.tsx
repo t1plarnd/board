@@ -1,6 +1,6 @@
 import { type FC } from "react";
 import Button from "../Button/button";
-import { AppContext } from "../../router/router";
+import { AppContext, ModalContext } from "../../router/router";
 import { useContext } from "react";
 
 export interface TaskProps {
@@ -11,16 +11,26 @@ export interface TaskProps {
 }
 
 const Task: FC<TaskProps> = ({ id, title, workspaceId, boardId }) => {
+  const modalContext = useContext(ModalContext);
   const context = useContext(AppContext);
-  if (!context) {
+  if (!context || !modalContext) {
     return null;
   }
 
   return (
     <div className="task-card">
-      <Button value="Delete task" onClick={() => context.taskCallbacks.delete(workspaceId, boardId, id)} />
-      <Button value="Update task" onClick={() => context.taskCallbacks.update(workspaceId, boardId, id)} />
-      {/*<p className="task-id">{id}</p>*/}
+      <Button value="Delete task" onClick={() =>  {
+        modalContext.setBoardId(boardId)
+        modalContext.setTaskId(id)
+        modalContext.setWorkspaceId(workspaceId)
+        modalContext.openModal("deleteTask")
+        }}/>
+      <Button value="Update task" onClick={() => {
+        modalContext.setBoardId(boardId)
+        modalContext.setTaskId(id)
+        modalContext.setWorkspaceId(workspaceId)
+        modalContext.openModal("updateTask")
+      }} />
       <h3 className="task-title">{title}</h3>
     </div>
   );

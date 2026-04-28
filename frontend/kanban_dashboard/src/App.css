@@ -104,3 +104,48 @@
   color: white;
   border-bottom: 3px solid #000000;
 }
+
+.myModalAl {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  display: none;
+  background: rgba( 0, 0, 0, 0.5);
+}
+
+.myModalAl.active{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+}
+
+.myModalContentAl{
+  padding: 25px;
+  background: white;
+  border-radius: 16px;
+  min-width: 250px;
+}
+.myModal {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  display: none;
+  background: rgba( 0, 0, 0, 0.5);
+}
+
+.myModal.active{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.myModalContent{
+  padding: 25px;
+  background: white;
+  border-radius: 16px;
+  min-width: 250px;
+}
