@@ -5,24 +5,36 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import Button from '../components/Button/button.tsx';
 import type { Workspace as WorkspaceInterface } from '../types/workspace.tsx';
 import mockData from '../constants/mockData.ts';
-import ModalAlert from '../components/Modal/modalAlert.tsx'; 
-import ModalCreateWorkspace from '../components/Modal/modalCreateWorkspace.tsx';
-import ModalCreateBoard from '../components/Modal/modalCreateBoard.tsx';
-import ModalCreateTask from '../components/Modal/modalCreateTask.tsx';
-import ModalUpdateWorkspace from '../components/Modal/modalUpdateWorkspace.tsx'; // Якщо є
-import ModalUpdateBoard from '../components/Modal/modalUpdateBoard.tsx';
-import ModalUpdateTask from '../components/Modal/modalUpdateTask.tsx'; // Якщо є
-import ModalDeleteWorkspace from '../components/Modal/modalDeleteWorkspace.tsx'; // Якщо є
-import ModalDeleteBoard from '../components/Modal/modalDeleteBoard.tsx';
-import ModalDeleteTask from '../components/Modal/modalDeleteTask.tsx'; // Якщо є
 
+import ModalCreateWorkspace from '../components/Modal/modalCreateWorkspace.tsx';
 import type AppWorkspaceContext from '../contexts/AppWorkspaceContext.tsx';
-import type ModalContext from '../contexts/ModalContext.tsx';
+import { ModalContext, ModalContextWrapper } from '../contexts/ModalContext.tsx';
 
 const defaultData = mockData;
 
 export const AppContext = createContext<AppWorkspaceContext | null>(null);
-export const ModalContext = createContext<ModalContext | null>(null);
+
+const Root = () => {
+    const { handleCloseModal, handleOpenModal } = useContext(ModalContext);
+    const context = useContext(AppContext);
+
+    return (
+        <div>
+            <NavBar workspaces={context?.data || []} />
+            
+            <Button value='Create workspace' onClick={() => {
+                handleOpenModal(
+                    <ModalCreateWorkspace onSuccess={(workspaceName) => {
+                        context?.workspaceCallbacks.create(workspaceName);
+                        handleCloseModal();
+                    }}/>
+                );
+            }}/>
+            
+            <Outlet />
+        </div>
+    );
+};
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -35,24 +47,24 @@ const rootRoute = createRootRoute({
       localStorage.setItem('my_kanban_data', JSON.stringify(data));
     }, [data]);
 
-    const handleCreateWorkspace = (name: string, workspaceId: string, taskId: string, boardId: string) => {
+    const handleCreateWorkspace = (name: string) => {
         if (!name || name.trim() === "") return; 
         setData((prev) => [
             ...prev, 
             { id: `w_${Date.now()}`, name: name, boards: [] }  
         ]);
     };
-    const handlePatchWorkspace = (name: string, workspaceId: string, taskId: string, boardId: string) => {
+    const handleUpdateWorkspace = (name: string, workspaceId: string) => {
         if (!name || name.trim() === "") return; 
         setData((prev) => prev.map((workspace) => 
             workspace.id === workspaceId ? { ...workspace, name: name } : workspace
         ));
     };
-    const handleDeleteWorkspace = (name: string, workspaceId: string, taskId: string, boardId: string) => {
+    const handleDeleteWorkspace = (workspaceId: string) => {
         setData((prev) => prev.filter((workspace) => workspace.id !== workspaceId));
     };
 
-    const handleCreateBoard = (name: string, workspaceId: string, taskId: string, boardId: string) => {
+    const handleCreateBoard = (name: string, workspaceId: string) => {
         if (!name || name.trim() === "") return;
         setData((prev) =>
             prev.map((workspace) => {
@@ -66,7 +78,7 @@ const rootRoute = createRootRoute({
             })
         );
     };
-    const handlePatchBoard = (name: string, workspaceId: string, taskId: string, boardId: string) => {
+    const handleUpdateBoard = (name: string, workspaceId: string, boardId: string) => {
         if (!name || name.trim() === "") return;
         setData((prev) =>
             prev.map((workspace) => {
@@ -82,7 +94,7 @@ const rootRoute = createRootRoute({
             })
         );
     };
-    const handleDeleteBoard = (name: string, workspaceId: string, taskId: string, boardId: string) => {
+    const handleDeleteBoard = (workspaceId: string, boardId: string) => {
         setData((prev) =>
             prev.map((workspace) => {
                 if (workspace.id === workspaceId) {
@@ -96,7 +108,7 @@ const rootRoute = createRootRoute({
         );
     };
 
-    const handleCreateTask = (name: string, workspaceId: string, taskId: string, boardId: string) => {
+    const handleCreateTask = (name: string, workspaceId: string, boardId: string) => {
         if (!name || name.trim() === "") return;
         setData((prev) =>
             prev.map((workspace) => {
@@ -118,7 +130,7 @@ const rootRoute = createRootRoute({
             })
         );
     };
-    const handlePatchTask = (name: string, workspaceId: string, taskId: string, boardId: string) => {
+    const handleUpdateTask = (name: string, workspaceId: string, boardId: string, taskId: string) => {
         if (!name || name.trim() === "") return;
         setData((prev) =>
             prev.map((workspace) => {
@@ -142,7 +154,7 @@ const rootRoute = createRootRoute({
             })
         );
     };
-    const handleDeleteTask = (name: string, workspaceId: string, taskId: string, boardId: string) => {
+    const handleDeleteTask = (workspaceId: string, boardId: string, taskId: string) => {
         setData((prev) =>
             prev.map((workspace) => {
                 if (workspace.id === workspaceId) {
@@ -163,137 +175,29 @@ const rootRoute = createRootRoute({
             })
         );
     };
-    
-    const [modalCreateWorkspaceState, setModalCreateWorkspaceState] = useState(false);
-    const [modalCreateTaskState, setModalCreateTaskState] = useState(false);
-    const [modalCreateBoardState, setModalCreateBoardState] = useState(false);
-
-    const [modalUpdateWorkspaceState, setModalUpdateWorkspaceState] = useState(false);
-    const [modalUpdateTaskState, setModalUpdateTaskState] = useState(false);
-    const [modalUpdateBoardState, setModalUpdateBoardState] = useState(false);
-
-    const [modalDeleteWorkspaceState, setModalDeleteWorkspaceState] = useState(false);
-    const [modalDeleteTaskState, setModalDeleteTaskState] = useState(false);
-    const [modalDeleteBoardState, setModalDeleteBoardState] = useState(false);
-
-    const [modalAlertState, setModalAlertState] = useState(false);
-
-    const [workspaceId, setWorkspaceId] = useState("")
-    const [boardId, setBoardId] = useState("")
-    const [taskId, setTaskId] = useState("")
-
-    const [name, setName] = useState("");
-    const [actionName, setActionName] = useState("");
-
-    const closeModal = () => {
-        setModalAlertState(false);
-        
-        setModalCreateWorkspaceState(false);
-        setModalCreateBoardState(false);
-        setModalCreateTaskState(false);
-        
-        setModalUpdateWorkspaceState(false);
-        setModalUpdateBoardState(false);
-        setModalUpdateTaskState(false);
-        
-        setModalDeleteWorkspaceState(false);
-        setModalDeleteBoardState(false);
-        setModalDeleteTaskState(false);
-    }
-
-    const openModal = (modalName: string) => {
-        closeModal();
-
-        if (modalName === 'createWorkspace') setModalCreateWorkspaceState(true);
-        if (modalName === 'createBoard') setModalCreateBoardState(true);
-        if (modalName === 'createTask') setModalCreateTaskState(true);
-
-        if (modalName === 'updateWorkspace') setModalUpdateWorkspaceState(true);
-        if (modalName === 'updateBoard') setModalUpdateBoardState(true);
-        if (modalName === 'updateTask') setModalUpdateTaskState(true);
-        
-        if (modalName === 'deleteWorkspace') setModalDeleteWorkspaceState(true);
-        if (modalName === 'deleteBoard') setModalDeleteBoardState(true);
-        if (modalName === 'deleteTask') setModalDeleteTaskState(true);
-
-        if (modalName === 'alert') setModalAlertState(true);
-    }
-
-    const setNameModal = (name: string) => setName(name);
-    const setActionToUse = (name: string) => setActionName(name);
-    const setWorkspaceIdf = (id: string) => setWorkspaceId(id);
-    const setBoardIdf = (id: string) => setBoardId(id);
-    const setTaskIdf = (id: string) => setTaskId(id);
 
     return (
       <AppContext.Provider value={{ 
         data, 
         boardCallbacks: {
           create: handleCreateBoard,
-          update: handlePatchBoard,
+          update: handleUpdateBoard,
           delete: handleDeleteBoard
         },
         workspaceCallbacks: {
           create: handleCreateWorkspace,
-          update: handlePatchWorkspace,
+          update: handleUpdateWorkspace,
           delete: handleDeleteWorkspace
         },
         taskCallbacks: {
           create: handleCreateTask,
-          update: handlePatchTask,
+          update: handleUpdateTask,
           delete: handleDeleteTask
         } 
       }}>
-        <ModalContext.Provider value={{
-            name: name,
-            actionToUse: actionName,
-
-            modalAlertState: modalAlertState,
-
-            modalCreateWorkspaceState: modalCreateWorkspaceState,
-            modalCreateBoardState: modalCreateBoardState,
-            modalCreateTaskState: modalCreateTaskState,
-            
-            modalPatchWorkspaceState: modalUpdateWorkspaceState,
-            modalPatchBoardState: modalUpdateBoardState,
-            modalPatchTaskState: modalUpdateTaskState,
-            
-            modalDeleteWorkspaceState: modalDeleteWorkspaceState,
-            modalDeleteBoardState: modalDeleteBoardState,
-            modalDeleteTaskState: modalDeleteTaskState,
-
-            openModal: openModal,
-            closeModal: closeModal,
-            setName: setNameModal,
-            setActionToUse: setActionToUse,
-
-            workspaceId: workspaceId,
-            boardId: boardId,
-            taskId: taskId,
-
-            setWorkspaceId: setWorkspaceIdf,
-            setBoardId: setBoardIdf,
-            setTaskId: setTaskIdf
-        }}>
-          <div>
-            <NavBar workspaces={data} />
-            <Button value='Create workspace' onClick={() => openModal("createWorkspace")}/>
-            <Outlet />
-            <ModalAlert visible={modalAlertState} />
-            
-            <ModalCreateWorkspace visible={modalCreateWorkspaceState} />
-            <ModalCreateBoard visible={modalCreateBoardState} />
-            <ModalCreateTask visible={modalCreateTaskState} />
-            
-            <ModalUpdateWorkspace visible={modalUpdateWorkspaceState} />
-            <ModalUpdateBoard visible={modalUpdateBoardState} />
-            <ModalUpdateTask visible={modalUpdateTaskState} />
-            
-            <ModalDeleteWorkspace visible={modalDeleteWorkspaceState} />
-            <ModalDeleteBoard visible={modalDeleteBoardState} />
-            <ModalDeleteTask visible={modalDeleteTaskState} />
-          </div>
-        </ModalContext.Provider>
+        <ModalContextWrapper>
+          <Root />
+        </ModalContextWrapper>
       </AppContext.Provider>
     );
   },

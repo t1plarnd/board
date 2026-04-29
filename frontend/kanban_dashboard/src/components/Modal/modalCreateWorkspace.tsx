@@ -1,18 +1,14 @@
-import { useContext, useState, type FC } from "react";
+import { useState, type FC } from "react";
 import Button from "../Button/button";
-import { ModalContext } from "../../router/router";
+
 
 interface ModalProps {
-    visible: boolean;
+    onSuccess: (workspaceName: string) =>  void,
 }
 
-const ModalCreateWorkspace: FC<ModalProps> = ({visible}) => {
+const ModalCreateWorkspace: FC<ModalProps> = ({onSuccess}) => {
     const [inputValue, setInputValue] = useState("");
     const [error, setError] = useState("");
-    
-    const modalContext = useContext(ModalContext);
-
-    if (!visible || !modalContext) return null;
 
     const handleSubmit = () => {
         if (/[^a-z]/.test(inputValue)) {
@@ -28,11 +24,7 @@ const ModalCreateWorkspace: FC<ModalProps> = ({visible}) => {
             return;
         }
         setError(""); 
-        
-        modalContext.setName(inputValue);
-        modalContext.setActionToUse("handleCreateWorkspace");
-        modalContext.openModal("alert");
-        
+        onSuccess(inputValue);
         setInputValue(""); 
     };
 
@@ -52,4 +44,5 @@ const ModalCreateWorkspace: FC<ModalProps> = ({visible}) => {
         </div>
     );
 }
+
 export default ModalCreateWorkspace;

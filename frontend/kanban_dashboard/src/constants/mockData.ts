@@ -1,6 +1,5 @@
 import type {Workspace as WorkspaceInterface} from '../types/workspace.tsx';
 
-
 const mockData: WorkspaceInterface[] = [{
       "id": "w1",
       "name": "Work",

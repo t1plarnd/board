@@ -5,6 +5,7 @@ import type {Workspace as WorkspaceInterface} from '../../types/workspace.tsx';
 interface NavBarProps{
     workspaces: WorkspaceInterface[];
 }
+
 const NavBar: FC<NavBarProps> = ({ workspaces }) => {
   return (
     <nav className="top-navbar">

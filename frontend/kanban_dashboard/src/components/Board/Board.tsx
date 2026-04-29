@@ -2,7 +2,11 @@ import { useContext } from "react";
 import { type FC } from "react";
 import Task, { type TaskProps } from "../Task/Task";
 import Button from "../Button/button";
-import { AppContext, ModalContext } from "../../router/router";
+import { AppContext } from "../../router/router";
+import ModalDeleteBoard from "../Modal/modalDeleteBoard";
+import ModalUpdateBoard from "../Modal/modalUpdateBoard";
+import ModalCreateTask from "../Modal/modalCreateTask";
+import { ModalContext } from "../../contexts/ModalContext";
 
 export interface BoardProps {
   workspaceId: string;
@@ -22,24 +26,23 @@ const Board: FC<BoardProps> = ({ workspaceId, id, name, tasks }) => {
   return (
     <div className="board-column">
       <h1>{name}</h1>
-      <Button value="Delete board" onClick={() => {
-        modalContext.setBoardId(id)
-        modalContext.setTaskId("")
-        modalContext.setWorkspaceId(workspaceId)
-        modalContext.openModal("deleteBoard")
-      }} />
-      <Button value="Update board" onClick={() => {
-        modalContext.setBoardId(id)
-        modalContext.setTaskId("")
-        modalContext.setWorkspaceId(workspaceId)
-        modalContext.openModal("updateBoard")
-      }} />
-      <Button value="Create task" onClick={() => {
-        modalContext.setBoardId(id)
-        modalContext.setTaskId("")
-        modalContext.setWorkspaceId(workspaceId)
-        modalContext.openModal("createTask")
-      }} />
+      <Button value="Delete board" onClick={() => {modalContext.handleOpenModal(<ModalDeleteBoard onSuccess={() => {
+                context.boardCallbacks.delete(workspaceId, id)
+                modalContext.handleCloseModal()
+                }}/>
+  )}}/>
+      <Button value="Update board" onClick={() => {modalContext.handleOpenModal(
+        <ModalUpdateBoard onSuccess={(boardName) => {
+                context.boardCallbacks.update(boardName, workspaceId, id)
+                modalContext.handleCloseModal()
+                }} />
+  )}} />
+      <Button value="Create task" onClick={() => {modalContext.handleOpenModal(
+        <ModalCreateTask  onSuccess={(boardName) => {
+                context.taskCallbacks.create(boardName, workspaceId, id)
+                modalContext.handleCloseModal()
+                }}/>
+  )}} />
       <div>
         {tasks.map((task) => (
           <Task 
