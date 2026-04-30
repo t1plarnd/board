@@ -7,6 +7,8 @@ interface ModalAlProps{
 }
 
 const ModalAlert: FC<ModalAlProps> = ({onSuccess, onFailure}) => {
+    
+
     return(
         <div className="myModalAl active">
             <div className="myModalContentAl">

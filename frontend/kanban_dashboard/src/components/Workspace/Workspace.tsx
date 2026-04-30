@@ -7,6 +7,7 @@ import ModalUpdateWorkspace from "../Modal/modalUpdateWorkspace";
 import ModalCreateBoard from "../Modal/modalCreateBoard";
 import { ModalContext } from "../../contexts/ModalContext";
 import ModalDeleteWorkspace from "../Modal/modalDeleteWorkspace";
+import ModalAlert from "../Modal/modalAlert";
 
 interface WorkspaceProps{
     id: string;
@@ -27,20 +28,25 @@ const Workspace: FC<WorkspaceProps> = ({id, name, boards}) => {
             <h1 className="workspace_data">{name}</h1>
             <Button value="Update workspace" onClick={() => {modalContext.handleOpenModal(
                 <ModalUpdateWorkspace  onSuccess={(workspaceName) => {
-                context.workspaceCallbacks.update(workspaceName, id)
-                modalContext.handleCloseModal()
+                modalContext.handleCloseModal(<ModalAlert onFailure={modalContext.handleOnDecline} onSuccess={() => {
+                    context.workspaceCallbacks.update(workspaceName, id)
+                    modalContext.handleOnDecline()
+                }}/>)
                 }} />
     )}} />
             <Button value="Delete workspace" onClick={() => {modalContext.handleOpenModal(
                < ModalDeleteWorkspace  onSuccess={() => {
-                context.workspaceCallbacks.delete(id)
-                modalContext.handleCloseModal()
+                modalContext.handleCloseModal(<ModalAlert onFailure={modalContext.handleOnDecline} onSuccess={() => {context.workspaceCallbacks.delete(id)
+                modalContext.handleOnDecline()
+                }}/>)
                 }} />
     )}} />
             <Button value="Create board" onClick={() => {modalContext.handleOpenModal(
                 <ModalCreateBoard  onSuccess={(boardName) => {
-                context.boardCallbacks.create(boardName, id)
-                modalContext.handleCloseModal()
+                modalContext.handleCloseModal(<ModalAlert onFailure={modalContext.handleOnDecline} onSuccess={() => {
+                    context.boardCallbacks.create(boardName, id)
+                    modalContext.handleOnDecline()
+                }}/>)
                 }} />
     )}} />
             <div className="kanban-container">

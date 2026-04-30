@@ -7,6 +7,7 @@ import ModalDeleteBoard from "../Modal/modalDeleteBoard";
 import ModalUpdateBoard from "../Modal/modalUpdateBoard";
 import ModalCreateTask from "../Modal/modalCreateTask";
 import { ModalContext } from "../../contexts/ModalContext";
+import ModalAlert from "../Modal/modalAlert";
 
 export interface BoardProps {
   workspaceId: string;
@@ -27,20 +28,25 @@ const Board: FC<BoardProps> = ({ workspaceId, id, name, tasks }) => {
     <div className="board-column">
       <h1>{name}</h1>
       <Button value="Delete board" onClick={() => {modalContext.handleOpenModal(<ModalDeleteBoard onSuccess={() => {
-                context.boardCallbacks.delete(workspaceId, id)
-                modalContext.handleCloseModal()
+                modalContext.handleCloseModal(<ModalAlert onFailure={modalContext.handleOnDecline} onSuccess={() => {
+                  context.boardCallbacks.delete(workspaceId, id)
+                  modalContext.handleOnDecline()
+      }}/>)
                 }}/>
   )}}/>
       <Button value="Update board" onClick={() => {modalContext.handleOpenModal(
         <ModalUpdateBoard onSuccess={(boardName) => {
-                context.boardCallbacks.update(boardName, workspaceId, id)
-                modalContext.handleCloseModal()
+                modalContext.handleCloseModal(<ModalAlert onFailure={modalContext.handleOnDecline} onSuccess={() => {
+                  context.boardCallbacks.update(boardName, workspaceId, id)
+                  modalContext.handleOnDecline()
+                }}/>)
                 }} />
   )}} />
       <Button value="Create task" onClick={() => {modalContext.handleOpenModal(
         <ModalCreateTask  onSuccess={(boardName) => {
-                context.taskCallbacks.create(boardName, workspaceId, id)
-                modalContext.handleCloseModal()
+                modalContext.handleCloseModal(<ModalAlert onFailure={modalContext.handleOnDecline} onSuccess={() => {context.taskCallbacks.create(boardName, workspaceId, id)
+                  modalContext.handleOnDecline()
+                }}/>)
                 }}/>
   )}} />
       <div>

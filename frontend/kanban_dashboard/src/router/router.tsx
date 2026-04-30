@@ -5,17 +5,17 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import Button from '../components/Button/button.tsx';
 import type { Workspace as WorkspaceInterface } from '../types/workspace.tsx';
 import mockData from '../constants/mockData.ts';
-
 import ModalCreateWorkspace from '../components/Modal/modalCreateWorkspace.tsx';
 import type AppWorkspaceContext from '../contexts/AppWorkspaceContext.tsx';
 import { ModalContext, ModalContextWrapper } from '../contexts/ModalContext.tsx';
+import ModalAlert from '../components/Modal/modalAlert.tsx';
 
 const defaultData = mockData;
 
 export const AppContext = createContext<AppWorkspaceContext | null>(null);
 
 const Root = () => {
-    const { handleCloseModal, handleOpenModal } = useContext(ModalContext);
+    const { handleCloseModal, handleOpenModal, handleOnDecline} = useContext(ModalContext);
     const context = useContext(AppContext);
 
     return (
@@ -25,8 +25,10 @@ const Root = () => {
             <Button value='Create workspace' onClick={() => {
                 handleOpenModal(
                     <ModalCreateWorkspace onSuccess={(workspaceName) => {
-                        context?.workspaceCallbacks.create(workspaceName);
-                        handleCloseModal();
+                        handleCloseModal(<ModalAlert onFailure={handleOnDecline} onSuccess={() => {
+                            context?.workspaceCallbacks.create(workspaceName)
+                            handleOnDecline()
+                    }}/>);
                     }}/>
                 );
             }}/>

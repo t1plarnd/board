@@ -5,6 +5,7 @@ import { useContext } from "react";
 import ModalDeleteTask from "../Modal/modalDeleteTask";
 import ModalUpdateTask from "../Modal/modalUpdateTask";
 import { ModalContext } from "../../contexts/ModalContext";
+import ModalAlert from "../Modal/modalAlert";
 
 export interface TaskProps {
   id: string;
@@ -25,14 +26,18 @@ const Task: FC<TaskProps> = ({ id, title, workspaceId, boardId }) => {
     <div className="task-card">
       <Button value="Delete task" onClick={() =>  {modalContext.handleOpenModal(
           <ModalDeleteTask onSuccess={() => {
-                context.taskCallbacks.delete(workspaceId, boardId, id)
-                modalContext.handleCloseModal()
+                modalContext.handleCloseModal(<ModalAlert onFailure={modalContext.handleOnDecline} onSuccess={() => {
+                  context.taskCallbacks.delete(workspaceId, boardId, id)
+                  modalContext.handleOnDecline()
+                }}/>)
                 }}/>
   )}}/>
       <Button value="Update task" onClick={() => {modalContext.handleOpenModal(
           <ModalUpdateTask onSuccess={(taskName) => {
-                context.taskCallbacks.update(taskName, workspaceId, boardId, id)
-                modalContext.handleCloseModal()
+                modalContext.handleCloseModal(<ModalAlert onFailure={modalContext.handleOnDecline} onSuccess={() => {
+                  context.taskCallbacks.update(taskName, workspaceId, boardId, id)
+                  modalContext.handleOnDecline()
+                }}/>)
                 }}/>
   )}} />
       <h3 className="task-title">{title}</h3>
